@@ -20,7 +20,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         if (response.ok && data.success) {
             localStorage.setItem("usuario", JSON.stringify(data.usuario));
             
-            if (correo === "admin@museos.com") {
+            if (correo === "admin@correo.com") {
                 window.location.href = "admin.html";
             } else {
                 window.location.href = "usuario.html";
