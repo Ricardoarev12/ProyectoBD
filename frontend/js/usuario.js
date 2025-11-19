@@ -1,51 +1,25 @@
-// ---------------------
-// MOCK DE MUSEOS
-// ---------------------
-const museosDemo = [
-    {
-        id: 1,
-        nombre: "Museo Nacional de Arte",
-        tipo: "Arte",
-        estado: "Ciudad de México",
-        municipio: "Cuauhtémoc",
-        direccion: "Calle Tacuba 8",
-        telefono: "5551234567",
-        horario: "10:00 - 18:00"
-    },
-    {
-        id: 2,
-        nombre: "Museo de Historia Natural",
-        tipo: "Ciencia",
-        estado: "Jalisco",
-        municipio: "Guadalajara",
-        direccion: "Av. Vallarta 1234",
-        telefono: "3334567890",
-        horario: "09:00 - 17:00"
+const API_BASE_URL = "https://apidb-l0p7.onrender.com";
+
+async function buscarMuseos() {
+    const nombre = document.getElementById("buscarNombre").value.trim();
+
+    try {
+        let url = `${API_BASE_URL}/museos`;
+        
+        if (nombre !== "") {
+            url += `?nombre=${encodeURIComponent(nombre)}`;
+        }
+
+        const response = await fetch(url);
+        const resultados = await response.json();
+
+        mostrarResultados(resultados);
+    } catch (error) {
+        console.error("Error al buscar museos:", error);
+        alert("Error al buscar museos");
     }
-];
-
-// ---------------------
-// BUSCAR MUSEOS POR NOMBRE
-// ---------------------
-function buscarMuseos() {
-
-    const nombre = document.getElementById("buscarNombre").value.toLowerCase();
-
-    let resultados = museosDemo;
-
-    // Solo filtrar por nombre
-    if (nombre !== "") {
-        resultados = resultados.filter(m =>
-            m.nombre.toLowerCase().includes(nombre)
-        );
-    }
-
-    mostrarResultados(resultados);
 }
 
-// ---------------------
-// MOSTRAR RESULTADOS
-// ---------------------
 function mostrarResultados(lista) {
     const div = document.getElementById("resultados");
     div.innerHTML = "";
@@ -59,20 +33,17 @@ function mostrarResultados(lista) {
         div.innerHTML += `
             <div class="card-museo">
                 <h3>${m.nombre}</h3>
-                <p><b>Tipo:</b> ${m.tipo}</p>
-                <p><b>Estado:</b> ${m.estado}</p>
-                <p><b>Municipio:</b> ${m.municipio}</p>
-                <p><b>Dirección:</b> ${m.direccion}</p>
-                <p><b>Teléfono:</b> ${m.telefono}</p>
-                <p><b>Horario:</b> ${m.horario}</p>
+                <p><b>Tipo:</b> ${m.tipoMuseo.nombreTipo}</p>
+                <p><b>Estado:</b> ${m.municipio.estado.nombreEstado}</p>
+                <p><b>Municipio:</b> ${m.municipio.nombreMunicipio}</p>
+                <p><b>Dirección:</b> ${m.direccion || "No disponible"}</p>
+                <p><b>Teléfono:</b> ${m.telefono || "No disponible"}</p>
+                <p><b>Horario:</b> ${m.horario || "No disponible"}</p>
             </div>
         `;
     });
 }
 
-// ---------------------
-// CARRUSEL
-// ---------------------
 let slideIndex = 0;
 mostrarSlides();
 
@@ -89,7 +60,13 @@ function mostrarSlides() {
         slideIndex = 1;
     }
 
-    slides[slideIndex - 1].style.display = "block";
+    if (slides.length > 0) {
+        slides[slideIndex - 1].style.display = "block";
+    }
 
     setTimeout(mostrarSlides, 3500);
 }
+
+window.onload = async function() {
+    await buscarMuseos();
+};
