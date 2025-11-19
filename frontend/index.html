@@ -3,29 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de Sesión</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Diagnóstico API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        button {
+            background: #4682B4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .test {
+            border: 2px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border-color: #28a745; }
+        .error { background: #f8d7da; border-color: #dc3545; }
+        .waiting { background: #fff3cd; border-color: #ffc107; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
+    <h1>🔍 Diagnóstico de API</h1>
+    <p><strong>URL:</strong> https://apidb-l0p7.onrender.com</p>
 
-    <div class="login-container">
-        <h2>Sistema de Museos</h2>
+    <button onclick="diagnosticarTodo()">Ejecutar Diagnóstico Completo</button>
 
-        <form id="loginForm">
-            <div class="input-group">
-                <label>Correo</label>
-                <input type="email" id="correo" placeholder="correo@example.com" required>
-            </div>
+    <div id="resultados"></div>
 
-            <div class="input-group">
-                <label>Contraseña</label>
-                <input type="password" id="contrasena" placeholder="•••••••" required>
-            </div>
+    <script>
+        const API_BASE_URL = "https://apidb-l0p7.onrender.com";
 
-            <button type="submit">Ingresar</button>
-        </form>
-    </div>
+        async function diagnosticarTodo() {
+            const div = document.getElementById('resultados');
+            div.innerHTML = '<div class="test waiting"><strong>Iniciando diagnóstico...</strong></div>';
 
-    <script src="js/login.js"></script>
+            // Test 1: Verificar conectividad básica
+            await testConectividad();
+
+            // Test 2: Verificar endpoint de estados
+            await testEstados();
+
+            // Test 3: Intentar login con admin
+            await testLoginAdmin();
+
+            // Test 4: Intentar login con usuario
+            await testLoginUsuario();
+        }
+
+        async function testConectividad() {
+            const div = document.getElementById('resultados');
+            div.innerHTML += '<div id="test1" class="test waiting"><strong>Test 1: Conectividad básica</strong><br>Verificando...</div>';
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE_URL}/estados`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                const endTime = Date.now();
+                const tiempo = endTime - startTime;
+
+                const test1 = document.getElementById('test1');
+                if (response.ok) {
+                    test1.className = 'test success';
+                    test1.innerHTML = `
+                        <strong>✓ Test 1: Conectividad EXITOSA</strong><br>
+                        Status: ${response.status}<br>
+                        Tiempo: ${tiempo}ms<br>
+                        CORS: OK
+                    `;
+                } else {
+                    test1.className = 'test error';
+                    test1.innerHTML = `
+                        <strong>✗ Test 1: Error HTTP</strong><br>
+                        Status: ${response.status}<br>
+                        Error: ${response.statusText}
+                    `;
+                }
+            } catch (error) {
+                const test1 = document.getElementById('test1');
+                test1.className = 'test error';
+                test1.innerHTML = `
+                    <strong>✗ Test 1: Error de conexión</strong><br>
+                    Error: ${error.message}<br>
+                    Tipo: ${error.name}<br>
+                    <br>
+                    <strong>Posibles causas:</strong><br>
+                    • La API está inactiva (cold start)<br>
+                    • Problema de red<br>
+                    • URL incorrecta
+                `;
+            }
+        }
+
+        async function testEstados() {
+            const div = document.getElementById('resultados');
+            div.innerHTML += '<div id="test2" class="test waiting"><strong>Test 2: Endpoint /estados</strong><br>Verificando...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/estados`);
+                const data = await response.json();
+
+                const test2 = document.getElementById('test2');
+                if (response.ok) {
+                    test2.className = 'test success';
+                    test2.innerHTML = `
+                        <strong>✓ Test 2: /estados FUNCIONA</strong><br>
+                        Estados encontrados: ${data.length}<br>
+                        <pre>${JSON.stringify(data.slice(0, 2), null, 2)}</pre>
+                    `;
+                } else {
+                    test2.className = 'test error';
+                    test2.innerHTML = `
+                        <strong>✗ Test 2: Error</strong><br>
+                        Status: ${response.status}
+                    `;
+                }
+            } catch (error) {
+                const test2 = document.getElementById('test2');
+                test2.className = 'test error';
+                test2.innerHTML = `
+                    <strong>✗ Test 2: Error</strong><br>
+                    ${error.message}
+                `;
+            }
+        }
+
+        async function testLoginAdmin() {
+            const div = document.getElementById('resultados');
+            div.innerHTML += '<div id="test3" class="test waiting"><strong>Test 3: Login Admin</strong><br>Probando admin@correo.com...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/usuarios/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        correo: 'admin@correo.com',
+                        contrasena: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                const test3 = document.getElementById('test3');
+
+                if (response.ok && data.success) {
+                    test3.className = 'test success';
+                    test3.innerHTML = `
+                        <strong>✓ Test 3: Login Admin EXITOSO</strong><br>
+                        Usuario: ${data.usuario.nombre}<br>
+                        Correo: ${data.usuario.correo}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    test3.className = 'test error';
+                    test3.innerHTML = `
+                        <strong>✗ Test 3: Login FALLÓ</strong><br>
+                        Status: ${response.status}<br>
+                        Mensaje: ${data.message || 'Sin mensaje'}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                const test3 = document.getElementById('test3');
+                test3.className = 'test error';
+                test3.innerHTML = `
+                    <strong>✗ Test 3: Error de conexión</strong><br>
+                    ${error.message}
+                `;
+            }
+        }
+
+        async function testLoginUsuario() {
+            const div = document.getElementById('resultados');
+            div.innerHTML += '<div id="test4" class="test waiting"><strong>Test 4: Login Usuario</strong><br>Probando usuario@correo.com...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/usuarios/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        correo: 'usuario@correo.com',
+                        contrasena: 'usuario123'
+                    })
+                });
+
+                const data = await response.json();
+                const test4 = document.getElementById('test4');
+
+                if (response.ok && data.success) {
+                    test4.className = 'test success';
+                    test4.innerHTML = `
+                        <strong>✓ Test 4: Login Usuario EXITOSO</strong><br>
+                        Usuario: ${data.usuario.nombre}<br>
+                        Correo: ${data.usuario.correo}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    test4.className = 'test error';
+                    test4.innerHTML = `
+                        <strong>✗ Test 4: Login FALLÓ</strong><br>
+                        Status: ${response.status}<br>
+                        Mensaje: ${data.message || 'Sin mensaje'}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                const test4 = document.getElementById('test4');
+                test4.className = 'test error';
+                test4.innerHTML = `
+                    <strong>✗ Test 4: Error de conexión</strong><br>
+                    ${error.message}
+                `;
+            }
+        }
+
+        // Auto-ejecutar al cargar
+        window.onload = function() {
+            console.log('Página de diagnóstico cargada');
+            console.log('URL API:', API_BASE_URL);
+        };
+    </script>
 </body>
 </html>
