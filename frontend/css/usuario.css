@@ -32,7 +32,7 @@ body {
 .nav-right {
     display: flex;
     align-items: center;
-    gap: 35px; /* ← SEPARA Buscar y Cerrar sesión */
+    gap: 35px;
 }
 
 
