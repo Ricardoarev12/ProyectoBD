@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuario - Sistema de Museos</title>
+    <link rel="stylesheet" href="css/usuario.css" />
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div>Sistema de Museos</div>
+      <div class="nav-right">
+        <a href="#zonaBusqueda">Buscar</a>
+        <a href="index.html">Cerrar sesión</a>
+      </div>
+    </div>
+
+    <!-- CARRUSEL -->
+    <div class="carrusel-container">
+      <div class="carrusel-slide fade">
+        <img src="img/m1.jpg" />
+      </div>
+      <div class="carrusel-slide fade">
+        <img src="img/m2.jpg" />
+      </div>
+      <div class="carrusel-slide fade">
+        <img src="img/m3.jpeg" />
+      </div>
+      <div class="carrusel-slide fade">
+        <img src="img/m4.webp" />
+      </div>
+    </div>
+
+    <!-- ZONA DE FILTROS -->
+    <div id="zonaBusqueda" class="filtro-container">
+      <h2>Buscar Museos</h2>
+
+      <!-- Buscador por Nombre -->
+      <div class="filtro-group">
+        <label>Nombre del Museo</label>
+        <input type="text" id="buscarNombre" placeholder="Ej: Museo de Arte" />
+      </div>
+
+      <!-- Botón BUSCAR -->
+      <button class="btn-buscar" onclick="buscarMuseos()">Buscar</button>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div id="resultados" class="resultados-container"></div>
+
+    <script src="js/usuario.js"></script>
+  </body>
+</html>
